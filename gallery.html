@@ -1,190 +1,77 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pet Gallery</title>
-
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>FindMyPet — Lost & Found Gallery</title>
 <style>
-    body {
-        margin: 0;
-        background: #eef2f3;
-        font-family: Arial, sans-serif;
-    }
-
-    h1 {
-        text-align: center;
-        background: #007bff;
-        color: white;
-        padding: 20px;
-        margin: 0;
-        font-size: 26px;
-    }
-
-    #gallery {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-        gap: 15px;
-        padding: 20px;
-    }
-
-    .pet {
-        background: white;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 0 10px rgba(0,0,0,0.15);
-        transition: 0.2s;
-    }
-
-    .pet:hover {
-        transform: scale(1.02);
-    }
-
-    .pet img {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-    }
-
-    .info {
-        padding: 12px;
-    }
-
-    .status {
-        font-weight: bold;
-        font-size: 18px;
-        margin-bottom: 4px;
-    }
-
-    .lost {
-        color: red;
-    }
-
-    .found {
-        color: green;
-    }
-
-    .meta {
-        font-size: 14px;
-        color: #444;
-    }
-
-    .desc {
-        margin-top: 8px;
-        font-size: 14px;
-        color: #333;
-    }
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:#f5f9ff;color:#0b3b4c;}
+header{background:#0b76ef;color:white;padding:18px;text-align:center;font-size:clamp(18px,4vw,28px);}
+main{padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;}
+.card{background:white;border-radius:14px;box-shadow:0 8px 18px rgba(0,0,0,0.08);overflow:hidden;display:flex;flex-direction:column;transition:transform 0.2s;}
+.card:hover{transform:translateY(-4px);}
+.card img{width:100%;height:180px;object-fit:cover;}
+.card-body{padding:14px;flex:1;display:flex;flex-direction:column;}
+.card h3{margin:0 0 6px;font-size:18px;color:#063a58;}
+.card p{margin:4px 0;font-size:14px;flex:1;}
+.badge{display:inline-block;padding:4px 8px;border-radius:8px;font-size:12px;color:white;font-weight:700;margin-bottom:6px;}
+.lost{background:#ef4b4b;}
+.found{background:#4bef6f;}
 </style>
 </head>
-
 <body>
-
-<h1>Pet Gallery</h1>
-
-<div id="gallery"></div>
+<header>FindMyPet — Lost & Found Pets Gallery</header>
+<main id="gallery">Loading pets...</main>
 
 <script>
-/* -------------------------------
-   REALISTIC DUMMY PET GENERATOR
--------------------------------- */
+// Google Sheet JSON URL using OpenSheet
+const SHEET_JSON_URL = "https://opensheet.elk.sh/1baBmT7aDG6LXpFNts50DWNyuDOfO1NzR7ARD2qWb51I/Locations";
 
-const petTypes = ["Dog", "Cat", "Parrot", "Rabbit", "Turtle", "Hamster", "Pigeon"];
-const names = ["Bella","Max","Coco","Simba","Luna","Milo","Rocky","Snow","Shadow","Lucky","Ginger","Ruby","Oreo","Nala"];
-const statuses = ["Lost", "Found"];
-const descriptions = [
-    "Last seen near a busy road.",
-    "Found wandering alone near a shop.",
-    "Very friendly but looks scared.",
-    "Seems injured and hungry.",
-    "Seen following people around.",
-    "Looks well-groomed but lost.",
-    "Found hiding under a car.",
-    "Was crying loudly for help.",
-    "Has a collar but no tag.",
-    "Looks exhausted and confused."
-];
-
-function randomPhoto(type) {
-    // Realistic lost/found animal images
-    const base = {
-        Dog: [
-            "https://placedog.net/500/400", 
-            "https://loremflickr.com/500/400/dog"
-        ],
-        Cat: [
-            "https://loremflickr.com/500/400/cat",
-            "https://placekitten.com/500/400"
-        ],
-        Parrot: [
-            "https://loremflickr.com/500/400/parrot"
-        ],
-        Rabbit: [
-            "https://loremflickr.com/500/400/rabbit"
-        ],
-        Turtle: [
-            "https://loremflickr.com/500/400/turtle"
-        ],
-        Hamster: [
-            "https://loremflickr.com/500/400/hamster"
-        ],
-        Pigeon: [
-            "https://loremflickr.com/500/400/pigeon"
-        ]
-    };
-    const list = base[type] || base.Dog;
-    return list[Math.floor(Math.random() * list.length)];
-}
-
-function randomLocation() {
-    const places = [
-        "Nairobi CBD", "Westlands", "Kilimani", "South B",
-        "Mombasa", "Kisumu", "Nakuru", "Eldoret", 
-        "Thika", "Ruiru", "Meru", "Kitengela"
-    ];
-    return places[Math.floor(Math.random() * places.length)];
-}
-
-function generatePet() {
-    const type = petTypes[Math.floor(Math.random() * petTypes.length)];
-    return {
-        status: statuses[Math.floor(Math.random() * statuses.length)],
-        type,
-        name: names[Math.floor(Math.random() * names.length)],
-        desc: descriptions[Math.floor(Math.random() * descriptions.length)],
-        location: randomLocation(),
-        time: new Date().toLocaleString(),
-        photo: randomPhoto(type)
-    };
-}
-
-function loadGallery() {
-    const gallery = document.getElementById("gallery");
-    gallery.innerHTML = "";
-
-    for (let i = 0; i < 1000; i++) {  // THOUSANDS OF PETS
-        const pet = generatePet();
-
-        gallery.innerHTML += `
-            <div class="pet">
-                <img src="${pet.photo}">
-                <div class="info">
-                    <div class="status ${pet.status === "Lost" ? "lost" : "found"}">
-                        ${pet.status} - ${pet.name}
-                    </div>
-                    <div class="meta">${pet.type} • ${pet.location}</div>
-                    <div class="meta">Reported: ${pet.time}</div>
-                    <div class="desc">${pet.desc}</div>
-                </div>
-            </div>
-        `;
+async function loadPets(){
+  const gallery = document.getElementById('gallery');
+  gallery.innerHTML = "Loading pets...";
+  try {
+    const res = await fetch(SHEET_JSON_URL);
+    const data = await res.json();
+    if (!data.length) {
+      gallery.innerHTML = "<p>No pets reported yet.</p>";
+      return;
     }
+
+    gallery.innerHTML = "";
+    // Reverse to show newest first
+    data.reverse().forEach(item => {
+      const type = item['Lost or Found?'] || 'Lost';
+      const petType = item['Pet Type  (i.e dog, cat)'] || '';
+      const name = item['Pet Name'] || '';
+      const desc = item['Description'] || '';
+      // Use photo if exists, else placeholder
+      const photo = item['Photos'] || `https://loremflickr.com/320/240/${petType}?random=${Math.floor(Math.random()*1000)}`;
+      const badgeClass = type.toLowerCase().includes('lost') ? 'lost' : 'found';
+
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <img src="${photo}" alt="${petType} ${name}">
+        <div class="card-body">
+          <span class="badge ${badgeClass}">${type}</span>
+          <h3>${name || petType}</h3>
+          <p>${desc}</p>
+        </div>
+      `;
+      gallery.appendChild(card);
+    });
+  } catch(err){
+    console.error(err);
+    gallery.innerHTML = "<p>Failed to load pets. Try again later.</p>";
+  }
 }
 
-loadGallery();
+// Load pets on page load
+loadPets();
 
-// Auto-refresh with new realistic pets every 10 minutes
-setInterval(loadGallery, 600000);
+// Optional: Refresh every 10 minutes
+setInterval(loadPets, 600000);
 </script>
-
 </body>
 </html>
