@@ -19,31 +19,39 @@
         }
         #gallery {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
             gap: 15px;
             padding: 20px;
         }
         .pet-card {
             background: white;
-            padding: 10px;
-            border-radius: 10px;
-            box-shadow: 0 0 6px rgba(0,0,0,0.2);
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: 0 0 6px rgba(0,0,0,0.15);
         }
         .pet-card img {
             width: 100%;
-            border-radius: 8px;
-        }
-        .title {
-            font-weight: bold;
-            margin-top: 5px;
-            font-size: 18px;
-        }
-        .pet-type {
-            color: green;
-            font-size: 14px;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 10px;
         }
         .lost {
             color: red;
+            font-weight: bold;
+        }
+        .found {
+            color: green;
+            font-weight: bold;
+        }
+        .info {
+            margin-top: 5px;
+            font-size: 14px;
+            line-height: 1.4em;
+        }
+        .title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 5px;
         }
     </style>
 </head>
@@ -54,46 +62,87 @@
 <div id="gallery"></div>
 
 <script>
-/* ----------------------------------------------------------
-   ALWAYS SHOW DUMMY PETS — NEVER "No pets reported yet"
------------------------------------------------------------*/
+/* -----------------------------------------------------
+   Generate Ultra-Realistic Thousands of Dummy Pets
+------------------------------------------------------*/
 
-function randomPet() {
-    const types = ["Dog", "Cat", "Parrot", "Rabbit", "Turtle", "Hamster"];
-    const names = ["Bella", "Max", "Charlie", "Milo", "Simba", "Luna", "Rocky", "Coco"];
+function randomFrom(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function randomFloat(min, max) {
+    return (Math.random() * (max - min) + min).toFixed(6);
+}
+
+function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+function generatePet() {
+
     const statuses = ["Lost", "Found"];
+    const types = ["Dog", "Cat", "Parrot", "Rabbit", "Turtle", "Hamster", "Goat", "Chicken"];
+    const names = ["Bella", "Max", "Simba", "Milo", "Coco", "Rocky", "Chloe", "Lucky", "Shadow"];
+    const descriptions = [
+        "Very friendly, responds to name.",
+        "Shy but harmless, avoid sudden movements.",
+        "Last seen near a market area.",
+        "Wears a small collar.",
+        "Loves food and follows people.",
+        "Injured leg, limps slightly.",
+        "Can fly away if scared.",
+        "Has a unique color marking."
+    ];
 
     return {
-        status: statuses[Math.floor(Math.random() * statuses.length)],
-        type: types[Math.floor(Math.random() * types.length)],
-        name: names[Math.floor(Math.random() * names.length)],
-        photo: `https://placekitten.com/${300 + Math.floor(Math.random()*70)}/${300 + Math.floor(Math.random()*70)}`
+        timestamp: new Date().toLocaleString(),
+        status: randomFrom(statuses),
+        type: randomFrom(types),
+        name: randomFrom(names),
+        description: randomFrom(descriptions),
+        photo: `https://placekitten.com/${300 + randomInt(0,50)}/${300 + randomInt(0,50)}`,
+        whatsapp: "+2547" + randomInt(00000000, 99999999),
+        gmail: names[randomInt(0, names.length-1)].toLowerCase() + "@gmail.com",
+        lat: randomFloat(-90, 90),
+        lng: randomFloat(-180, 180),
+        accuracy: randomInt(3, 50),
+        notes: "Generated dummy pet data (system auto-refresh)."
     };
 }
 
-function loadDummyPets() {
+function loadGallery() {
     const gallery = document.getElementById("gallery");
-    gallery.innerHTML = "";  // CLEAR ANY “NO PET” TEXT
+    gallery.innerHTML = "";
 
-    for (let i = 0; i < 40; i++) {
-        const pet = randomPet();
+    // Generate 100 dummy pets instantly
+    for (let i = 0; i < 100; i++) {
+        const p = generatePet();
+
         gallery.innerHTML += `
             <div class="pet-card">
-                <img src="${pet.photo}" alt="Pet Photo">
-                <div class="title ${pet.status === "Lost" ? "lost" : ""}">
-                    ${pet.status} - ${pet.name}
-                </div>
-                <div class="pet-type">${pet.type}</div>
+                <img src="${p.photo}" alt="Pet Photo">
+
+                <div class="title ${p.status === "Lost" ? "lost" : "found"}">${p.status} - ${p.name}</div>
+
+                <div class="info"><b>Pet Type:</b> ${p.type}</div>
+                <div class="info"><b>Description:</b> ${p.description}</div>
+                <div class="info"><b>Timestamp:</b> ${p.timestamp}</div>
+                <div class="info"><b>WhatsApp:</b> ${p.whatsapp}</div>
+                <div class="info"><b>Email:</b> ${p.gmail}</div>
+                <div class="info"><b>Latitude:</b> ${p.lat}</div>
+                <div class="info"><b>Longitude:</b> ${p.lng}</div>
+                <div class="info"><b>Accuracy:</b> ${p.accuracy} m</div>
+                <div class="info"><b>Notes:</b> ${p.notes}</div>
             </div>
         `;
     }
 }
 
-// Load dummy pets IMMEDIATELY
-loadDummyPets();
+// Load pets immediately (no empty message)
+loadGallery();
 
-// Auto-refresh every 10 minutes
-setInterval(loadDummyPets, 600000);
+// Refresh every 10 minutes
+setInterval(loadGallery, 600000);
 </script>
 
 </body>
